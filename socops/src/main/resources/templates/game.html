@@ -28,9 +28,14 @@
             <p>Complete uma linha de cinco para fazer bingo.</p>
         </div>
 
-        <button onclick="launchGame()" class="primary-action">
-            Começar partida <span aria-hidden="true">↗</span>
-        </button>
+        <div class="mode-actions">
+            <button onclick="launchGame()" class="primary-action">
+                Começar bingo <span aria-hidden="true">↗</span>
+            </button>
+            <button onclick="launchGame('SCAVENGER')" class="secondary-action">
+                Scavenger Hunt <span aria-hidden="true">↗</span>
+            </button>
+        </div>
     </div>
     <footer class="lobby-footer"><span>5 × 5</span><span>EDIÇÃO SOCIAL</span></footer>
 </div>
@@ -49,29 +54,43 @@
         <div class="round-label">RODADA 01</div>
     </header>
 
-    <div class="game-intro">
-        <div>
-            <span class="eyebrow">CARTELA DE CONVERSA</span>
-            <h1>Encontre suas combinações.</h1>
+    <div id="bingoView">
+        <div class="game-intro">
+            <div>
+                <span class="eyebrow">CARTELA DE CONVERSA</span>
+                <h1>Encontre suas combinações.</h1>
+            </div>
+            <div class="progress-note"><span id="selectedCount">0</span> / 24<br><small>marcadas</small></div>
         </div>
-        <div class="progress-note"><span id="selectedCount">0</span> / 24<br><small>marcadas</small></div>
+
+        <!-- bingo banner (hidden until victory) -->
+        <div id="bingoBanner"
+             class="bingo-banner"
+             style="display:none">
+            <span aria-hidden="true">✦</span> BINGO! Você completou uma linha.
+        </div>
+
+        <!-- the 5×5 grid -->
+        <div class="board-stage">
+            <div id="gridContainer"
+                 class="bingo-grid">
+                <!-- tiles injected by JS -->
+            </div>
+        </div>
+        <footer class="game-footer"><span>CASA LIVRE NO CENTRO</span><span>TOQUE PARA MARCAR</span></footer>
     </div>
 
-    <!-- bingo banner (hidden until victory) -->
-    <div id="bingoBanner"
-         class="bingo-banner"
-         style="display:none">
-        <span aria-hidden="true">✦</span> BINGO! Você completou uma linha.
-    </div>
-
-    <!-- the 5×5 grid -->
-    <div class="board-stage">
-        <div id="gridContainer"
-             class="bingo-grid">
-            <!-- tiles injected by JS -->
+    <section id="scavengerView" class="scavenger-view" style="display:none">
+        <div class="scavenger-intro">
+            <div>
+                <span class="eyebrow">SCAVENGER HUNT</span>
+                <h1>Encontre as histórias.</h1>
+            </div>
+            <div id="scavengerProgress" class="progress-note" aria-live="polite" aria-atomic="true">0 / 24<br><small>encontradas</small></div>
         </div>
-    </div>
-    <footer class="game-footer"><span>CASA LIVRE NO CENTRO</span><span>TOQUE PARA MARCAR</span></footer>
+        <div id="scavengerList" class="scavenger-list"></div>
+        <footer class="game-footer"><span>24 PERGUNTAS</span><span>MARQUE AO ENCONTRAR</span></footer>
+    </section>
 </div>
 
 <!-- ============================================================= -->
@@ -105,6 +124,7 @@
     var streakFound = null;        /* WinningStreak or null       */
     var modalShown  = false;
     var currentPhase = "LOBBY";    /* LOBBY | ACTIVE | VICTORY    */
+    var currentMode = "BINGO";     /* BINGO | SCAVENGER          */
 
     /* ── DOM refs ─────────────────────────────────────────────── */
     var lobbyDiv   = document.getElementById("lobbyView");
@@ -113,12 +133,18 @@
     var bannerDiv  = document.getElementById("bingoBanner");
     var overlayDiv = document.getElementById("victoryOverlay");
     var selectedCount = document.getElementById("selectedCount");
+    var bingoDiv = document.getElementById("bingoView");
+    var scavengerDiv = document.getElementById("scavengerView");
+    var scavengerList = document.getElementById("scavengerList");
+    var scavengerProgress = document.getElementById("scavengerProgress");
 
     /* ── phase switching ──────────────────────────────────────── */
     function showPhase(phase) {
         currentPhase = phase;
         lobbyDiv.style.display   = (phase === "LOBBY") ? "" : "none";
         activeDiv.style.display  = (phase !== "LOBBY") ? "" : "none";
+        bingoDiv.style.display    = (currentMode === "BINGO") ? "" : "none";
+        scavengerDiv.style.display = (currentMode === "SCAVENGER") ? "" : "none";
         bannerDiv.style.display  = (streakFound)       ? "" : "none";
         overlayDiv.style.display = (modalShown)        ? "" : "none";
     }
@@ -177,6 +203,49 @@
             gridDiv.appendChild(btn);
         }
         selectedCount.textContent = String(markedCount);
+    }
+
+    function paintScavengerList() {
+        scavengerList.innerHTML = "";
+
+        liveTiles.forEach(function (tile) {
+            if (tile.freeCell) { return; }
+
+            var label = document.createElement("label");
+            label.className = "scavenger-item";
+            var input = document.createElement("input");
+            input.type = "checkbox";
+            input.checked = tile.selected;
+            input.setAttribute("aria-label", tile.prompt);
+            input.addEventListener("change", function () {
+                onScavengerChanged(tile.id, input.checked);
+            });
+            var prompt = document.createElement("span");
+            prompt.textContent = tile.prompt;
+            label.appendChild(input);
+            label.appendChild(prompt);
+            scavengerList.appendChild(label);
+        });
+
+        updateScavengerProgress();
+    }
+
+    function updateScavengerProgress() {
+        var foundCount = liveTiles.filter(function (tile) {
+            return !tile.freeCell && tile.selected;
+        }).length;
+        scavengerProgress.innerHTML = String(foundCount) + " / 24<br><small>encontradas</small>";
+    }
+
+    function onScavengerChanged(cellId, selected) {
+        liveTiles = liveTiles.map(function (tile) {
+            if (tile.id === cellId) {
+                return { id: tile.id, prompt: tile.prompt, selected: selected, freeCell: tile.freeCell };
+            }
+            return tile;
+        });
+        persistSnapshot();
+        updateScavengerProgress();
     }
 
     /* ── tile tap logic ───────────────────────────────────────── */
@@ -266,6 +335,7 @@
         try {
             var blob = JSON.stringify({
                 phase: currentPhase,
+                mode: currentMode,
                 tiles: liveTiles,
                 streak: streakFound,
                 modal: modalShown
@@ -284,21 +354,27 @@
             streakFound = snap.streak || null;
             modalShown  = !!snap.modal;
             currentPhase = snap.phase || "ACTIVE";
+            currentMode = snap.mode || "BINGO";
             return currentPhase !== "LOBBY";
         } catch (_) { return false; }
     }
 
     /* ── public API (called from onclick attrs) ───────────────── */
-    window.launchGame = function () {
+    window.launchGame = function (mode) {
         fetch("/api/bingo/fresh-board")
             .then(function (resp) { return resp.json(); })
             .then(function (cells) {
                 liveTiles   = cells;
+                currentMode = mode || "BINGO";
                 streakFound = null;
                 modalShown  = false;
                 currentPhase = "ACTIVE";
                 persistSnapshot();
-                paintGrid();
+                if (currentMode === "SCAVENGER") {
+                    paintScavengerList();
+                } else {
+                    paintGrid();
+                }
                 showPhase("ACTIVE");
             });
     };
@@ -306,6 +382,7 @@
     window.retreatToLobby = function () {
         liveTiles   = [];
         streakFound = null;
+        currentMode = "BINGO";
         modalShown  = false;
         currentPhase = "LOBBY";
         persistSnapshot();
@@ -320,7 +397,11 @@
 
     /* ── boot ─────────────────────────────────────────────────── */
     if (restoreSnapshot()) {
-        paintGrid();
+        if (currentMode === "SCAVENGER") {
+            paintScavengerList();
+        } else {
+            paintGrid();
+        }
         showPhase(currentPhase);
     } else {
         showPhase("LOBBY");
