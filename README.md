@@ -77,4 +77,5 @@ cd socops
 
 ## 🌍 Deployment
 
-Deploys automatically to GitHub Pages on push to `main`.
+This project deploys automatically to GitHub Pages on push to `main`.
+See [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) if you want to adapt deployment for your own fork.
