@@ -2,13 +2,33 @@
 
 # Soc Ops
 
-Social Bingo game for in-person mixers. Find people who match the questions and get 5 in a row!
+A social bingo game lab for in-person events, built to teach **context engineering** and **multi-agent workflows** with GitHub Copilot.
 
-📚 **[View Lab Guide](workshop/GUIDE.md)**
+🎯 Build, play, and learn by shipping a real app: collect 5 in a row by finding people who match each icebreaker prompt.
+
+📚 **[Start the Lab Guide](workshop/GUIDE.md)**
 
 ---
 
-## 📚 Lab Guide
+## ✨ Why this project is worth your time
+
+- Learn practical GitHub Copilot workflows beyond autocomplete
+- Practice design-first implementation with a real UI
+- Use custom agents (Quiz Master + TDD agents) in guided exercises
+- End with a deployable Spring Boot app published to GitHub Pages
+
+## 🚀 Jump in quickly
+
+```bash
+cd socops
+./mvnw spring-boot:run
+```
+
+Then open **http://localhost:8080**.
+
+---
+
+## 🧭 Lab roadmap
 
 | Part | Title |
 |------|-------|
@@ -22,30 +42,39 @@ Social Bingo game for in-person mixers. Find people who match the questions and 
 
 ---
 
-## Prerequisites
+## 🛠️ Prerequisites
 
 - [Java 21 JDK](https://adoptium.net/) or higher
 - [Apache Maven 3.9+](https://maven.apache.org/) (or use the included Maven Wrapper)
 
-## Run
+## ▶️ Run
 
 ```bash
 cd socops
 ./mvnw spring-boot:run
 ```
 
-## Build
+## 📦 Build
 
 ```bash
 cd socops
 ./mvnw clean package
 ```
 
-## Test
+## ✅ Test
 
 ```bash
 cd socops
 ./mvnw test
 ```
+
+## 🧱 What’s inside
+
+- **Backend:** Spring Boot 3 + Java 21
+- **Frontend:** Thymeleaf + Vanilla JavaScript
+- **Core game logic:** 5×5 bingo board with immutable center free-space
+- **Workshop content:** step-by-step docs in `workshop/`
+
+## 🌍 Deployment
 
 Deploys automatically to GitHub Pages on push to `main`.
