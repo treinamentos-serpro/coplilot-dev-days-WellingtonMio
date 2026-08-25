@@ -45,6 +45,17 @@ cd socops && ./mvnw spring-boot:run    # Verify runs locally
 - **Game Flow**: Always update both JS state AND localStorage on phase changes
 - **Free Cell**: Index 12 is immutable—never toggle, always pre-selected
 
+## 🎨 Design Guide — Desert Sand Minimal
+
+- **Visual direction**: Keep the interface calm, tactile, and editorial. Use sand and clay tones as the foundation, charcoal for structure, and blue-green only as a restrained functional contrast.
+- **Color tokens**: Define shared colors as CSS variables in `app.css`. Prefer the existing palette (`--paper`, `--paper-deep`, `--ink`, `--muted`, `--line`, `--sage`, `--sage-deep`, `--warm`) over introducing isolated hex values.
+- **Layout**: Let the 5×5 board remain the primary visual element. Use generous whitespace, thin separators, small uppercase metadata, and a controlled maximum width. Avoid card-within-card layouts and unnecessary decoration.
+- **Typography**: Use a readable sans-serif for controls and metadata, paired with a restrained serif for display headings. Keep letter spacing at zero for normal text and reserve tracking for small uppercase labels.
+- **Interaction states**: Make unselected, selected, free, and winning cells visually distinct while preserving contrast and square dimensions. Keep keyboard focus visible and retain `aria-pressed` and `aria-label` attributes on board buttons.
+- **Motion**: Use subtle transitions and one restrained reveal animation. Always provide a `prefers-reduced-motion` fallback.
+- **Responsive behavior**: Design for narrow screens first. Cells must remain square, prompts must wrap without overflow, and controls must remain tappable without shifting the board.
+- **Scope**: Keep the design dependency-free: Thymeleaf, vanilla JavaScript, and custom CSS only. Preserve the existing IDs, state machine, localStorage key, endpoint, and bingo rules when changing presentation.
+
 ## 🎯 Agent Workflows
 
 1. **Part 1 — Context Engineering**: `/setup` documents codebase
