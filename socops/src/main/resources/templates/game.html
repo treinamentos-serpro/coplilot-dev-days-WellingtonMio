@@ -1,93 +1,91 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Soc Ops — Social Bingo</title>
+    <title>Soc Ops | Bingo social</title>
     <link rel="stylesheet" th:href="@{/css/app.css}"/>
     <link rel="icon" type="image/png" th:href="@{/favicon.png}"/>
-    <style>
-        /* active-state tweaks that need pseudo-class selectors */
-        .tile-active:active { background-color: #f3f4f6 !important; }
-        .accent-active:active { background-color: #3b82f6 !important; }
-    </style>
 </head>
 <body class="h-full">
 
 <!-- ============================================================= -->
 <!--  LOBBY — visible before a game starts                          -->
 <!-- ============================================================= -->
-<div id="lobbyView" class="flex flex-col items-center justify-center min-h-full p-6 bg-gray-50">
-    <div class="text-center max-w-sm">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">Soc Ops</h1>
-        <p class="text-lg text-gray-600 mb-8">Social Bingo</p>
+<div id="lobbyView" class="lobby-shell">
+    <main class="lobby-content">
+        <div class="eyebrow">ENCONTROS • CONVERSAS • BINGO</div>
+        <h1>Soc Ops<span class="brand-mark">.</span></h1>
+        <p class="lobby-lede">Uma cartela para encontrar histórias em comum.</p>
 
-        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200 mb-8">
-            <h2 class="font-semibold text-gray-800 mb-3">How to play</h2>
-            <ul class="text-left text-gray-600 text-sm space-y-2">
-                <li>• Find people who match the questions</li>
-                <li>• Tap a square when you find a match</li>
-                <li>• Get 5 in a row to win!</li>
-            </ul>
+        <div class="lobby-rule" aria-hidden="true"></div>
+        <div class="lobby-details">
+            <span>01</span>
+            <p>Encontre alguém que combine com cada pergunta e marque a casa.</p>
+        </div>
+        <div class="lobby-details">
+            <span>02</span>
+            <p>Complete uma linha de cinco para fazer bingo.</p>
         </div>
 
-        <button onclick="launchGame()"
-                class="w-full bg-accent text-white font-semibold py-4 px-8 rounded-lg text-lg accent-active transition-colors">
-            Start Game
+        <button onclick="launchGame()" class="primary-action">
+            Começar partida <span aria-hidden="true">↗</span>
         </button>
     </div>
+    <footer class="lobby-footer"><span>5 × 5</span><span>EDIÇÃO SOCIAL</span></footer>
 </div>
 
 <!-- ============================================================= -->
 <!--  ACTIVE GAME — board, header, optional bingo banner            -->
 <!-- ============================================================= -->
-<div id="activeView" class="flex flex-col min-h-full bg-gray-50" style="display:none">
+<div id="activeView" class="game-shell" style="display:none">
 
     <!-- top bar -->
-    <header class="flex items-center justify-between p-3 bg-white border-b border-gray-200">
-        <button onclick="retreatToLobby()"
-                class="text-gray-500 text-sm px-3 py-1\.5 rounded tile-active">
-            &#8592; Back
+    <header class="game-header">
+        <button onclick="retreatToLobby()" class="back-action">
+            <span aria-hidden="true">←</span> Sair
         </button>
-        <h1 class="font-bold text-gray-900">Soc Ops</h1>
-        <div class="w-16"></div>
+        <div class="game-brand">SOC OPS<span class="brand-mark">.</span></div>
+        <div class="round-label">RODADA 01</div>
     </header>
 
-    <!-- hint -->
-    <p class="text-center text-gray-500 text-sm py-2 px-4">
-        Tap a square when you find someone who matches it.
-    </p>
+    <div class="game-intro">
+        <div>
+            <span class="eyebrow">CARTELA DE CONVERSA</span>
+            <h1>Encontre suas combinações.</h1>
+        </div>
+        <div class="progress-note"><span id="selectedCount">0</span> / 24<br><small>marcadas</small></div>
+    </div>
 
     <!-- bingo banner (hidden until victory) -->
     <div id="bingoBanner"
-         class="bg-amber-100 text-amber-800 text-center py-2 font-semibold text-sm"
+         class="bingo-banner"
          style="display:none">
-        &#127881; BINGO! You got a line!
+        <span aria-hidden="true">✦</span> BINGO! Você completou uma linha.
     </div>
 
     <!-- the 5×5 grid -->
-    <div class="flex-1 flex items-center justify-center p-3">
+    <div class="board-stage">
         <div id="gridContainer"
-             class="grid grid-cols-5 gap-1 w-full max-w-md mx-auto aspect-square">
+             class="bingo-grid">
             <!-- tiles injected by JS -->
         </div>
     </div>
+    <footer class="game-footer"><span>CASA LIVRE NO CENTRO</span><span>TOQUE PARA MARCAR</span></footer>
 </div>
 
 <!-- ============================================================= -->
 <!--  VICTORY MODAL — overlays the board                            -->
 <!-- ============================================================= -->
 <div id="victoryOverlay"
-     class="fixed inset-0 bg-black\/50 flex items-center justify-center p-4 z-50"
+     class="victory-overlay"
      style="display:none">
-    <div class="bg-white rounded-xl p-6 max-w-xs w-full text-center shadow-xl animate-[bounce_0.5s_ease-out]">
-        <div class="text-5xl mb-4">&#127881;</div>
-        <h2 class="text-3xl font-bold text-amber-500 mb-2">BINGO!</h2>
-        <p class="text-gray-600 mb-6">You completed a line!</p>
-        <button onclick="dismissVictoryModal()"
-                class="w-full bg-accent text-white font-semibold py-3 px-6 rounded-lg accent-active transition-colors">
-            Keep Playing
-        </button>
+    <div class="victory-card">
+        <div class="victory-symbol" aria-hidden="true">✦</div>
+        <span class="eyebrow">LINHA COMPLETA</span>
+        <h2>BINGO<span class="brand-mark">!</span></h2>
+        <p>Você encontrou cinco combinações em sequência.</p>
+        <button onclick="dismissVictoryModal()" class="primary-action">Continuar jogando <span aria-hidden="true">↗</span></button>
     </div>
 </div>
 
@@ -114,6 +112,7 @@
     var gridDiv    = document.getElementById("gridContainer");
     var bannerDiv  = document.getElementById("bingoBanner");
     var overlayDiv = document.getElementById("victoryOverlay");
+    var selectedCount = document.getElementById("selectedCount");
 
     /* ── phase switching ──────────────────────────────────────── */
     function showPhase(phase) {
@@ -128,10 +127,12 @@
     function paintGrid() {
         gridDiv.innerHTML = "";
         var winIds = streakFound ? gatherStreakIds(streakFound) : {};
+        var markedCount = 0;
 
         for (var t = 0; t < liveTiles.length; t++) {
             var tile = liveTiles[t];
             var btn = document.createElement("button");
+            if (tile.selected && !tile.freeCell) { markedCount++; }
 
             /* base styling identical to the original Blazor BingoSquare */
             var base = "relative flex items-center justify-center p-1 text-center " +
@@ -152,7 +153,7 @@
 
             if (tile.freeCell) { btn.disabled = true; }
             btn.setAttribute("aria-pressed", String(tile.selected));
-            btn.setAttribute("aria-label", tile.freeCell ? "Free space" : tile.prompt);
+            btn.setAttribute("aria-label", tile.freeCell ? "Casa livre" : tile.prompt);
 
             /* inner label */
             var labelSpan = document.createElement("span");
@@ -175,6 +176,7 @@
 
             gridDiv.appendChild(btn);
         }
+        selectedCount.textContent = String(markedCount);
     }
 
     /* ── tile tap logic ───────────────────────────────────────── */
